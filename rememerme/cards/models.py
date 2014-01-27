@@ -15,7 +15,7 @@ import random
 from rest_framework import serializers
 
 # User model faked to use Cassandra
-POOL = pycassa.ConnectionPool('games', server_list=settings.CASSANDRA_NODES)
+POOL = pycassa.ConnectionPool('marketplace', server_list=settings.CASSANDRA_NODES)
 
 class PhraseDeck(CassaModel):
     '''
@@ -27,6 +27,7 @@ class PhraseDeck(CassaModel):
     deck_id = models.TextField(primary_key=True)
     description = models.TextField()
     name = models.TextField()
+    active = models.BooleanField()
     last_modified = models.DateTimeField()
     date_created = models.DateTimeField()
 
@@ -84,7 +85,7 @@ class CassaPhraseDeckSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = PhraseDeck
-        fields = ('name', 'description', 'last_modified', 'date_created')
+        fields = ('name', 'description', 'last_modified', 'date_created', 'active')
 
 
 class PhraseCard(CassaModel):
@@ -97,6 +98,7 @@ class PhraseCard(CassaModel):
     description = models.TextField()
     deck = models.TextField()
     term = models.TextField()
+    active = models.BooleanField()
     last_modified = models.DateTimeField()
     date_created = models.DateTimeField()
 
@@ -165,7 +167,7 @@ class CassaPhraseCardSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = PhraseDeck
-        fields = ('deck', 'description', 'term', 'last_modified', 'date_created')
+        fields = ('deck', 'description', 'term', 'last_modified', 'date_created', 'active')
 
 
 class NominationDeck(CassaModel):
@@ -178,6 +180,7 @@ class NominationDeck(CassaModel):
     deck_id = models.TextField(primary_key=True)
     description = models.TextField()
     name = models.TextField()
+    active = models.BooleanField()
     last_modified = models.DateTimeField()
     date_created = models.DateTimeField()
     
@@ -235,7 +238,7 @@ class CassaNominationDeckSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = PhraseDeck
-        fields = ('deck_id', 'name', 'description', 'last_modified', 'date_created')
+        fields = ('deck_id', 'name', 'description', 'last_modified', 'date_created', 'active')
     
 class NominationCard(CassaModel):
     '''
@@ -247,6 +250,7 @@ class NominationCard(CassaModel):
     description = models.TextField()
     deck = models.TextField()
     term = models.TextField()
+    active = models.BooleanField()
     last_modified = models.DateTimeField()
     date_created = models.DateTimeField()
 
@@ -304,4 +308,4 @@ class CassaNominationCardSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = PhraseDeck
-        fields = ('deck', 'description', 'term', 'last_modified', 'date_created')
+        fields = ('deck', 'description', 'term', 'last_modified', 'date_created', 'active')
