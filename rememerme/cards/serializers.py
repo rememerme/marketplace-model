@@ -8,7 +8,7 @@ class PhraseCardSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = PhraseCard
-        fields = ('phrase_card_id', 'term', 'description', 'deck', 'last_modified', 'date_created')
+        fields = ('phrase_card_id', 'term', 'description', 'deck', 'last_modified', 'date_created', 'active')
         
 class NominationCardSerializer(serializers.ModelSerializer):
     '''
@@ -17,7 +17,7 @@ class NominationCardSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = NominationCard
-        fields = ('nomination_card_id', 'term', 'description', 'deck', 'last_modified', 'date_created')
+        fields = ('nomination_card_id', 'term', 'description', 'deck', 'last_modified', 'date_created', 'active')
         
 class PhraseDeckSerializer(serializers.ModelSerializer):
     '''
@@ -26,7 +26,7 @@ class PhraseDeckSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = PhraseDeck
-        fields = ('deck_id', 'name', 'description', 'last_modified', 'date_created')
+        fields = ('deck_id', 'name', 'description', 'last_modified', 'date_created', 'active')
 
 class NominationDeckSerializer(serializers.ModelSerializer):
     '''
@@ -35,4 +35,4 @@ class NominationDeckSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = NominationDeck
-        fields = ('deck_id', 'name', 'description', 'last_modified', 'date_created')
+        fields = ('deck_id', 'name', 'description', 'last_modified', 'date_created', 'active')
