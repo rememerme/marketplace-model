@@ -12,6 +12,7 @@ import pycassa
 from django.conf import settings
 import uuid
 import random
+from rest_framework import serializers
 
 # User model faked to use Cassandra
 POOL = pycassa.ConnectionPool('games', server_list=settings.CASSANDRA_NODES)
@@ -25,7 +26,10 @@ class PhraseDeck(CassaModel):
     
     deck_id = models.TextField(primary_key=True)
     description = models.TextField()
-    
+    name = models.TextField()
+    last_modified = models.DateTimeField()
+    date_created = models.DateTimeField()
+
     @staticmethod
     def fromMap(mapRep):
         '''
@@ -63,7 +67,25 @@ class PhraseDeck(CassaModel):
         if not isinstance(deck_id, uuid.UUID):
             deck_id = uuid.UUID(deck_id)
         return PhraseDeck.fromCassa((str(deck_id), PhraseDeck.table.get(deck_id)))
+    
+    def save(self):
+        '''
+            Saves a PhraseDeck given by the cassandra in/output, which is
+            a dictionary of values.
+        '''
+        deck_id = uuid.uuid1() if not self.deck_id else uuid.UUID(self.deck_id)
+        PhraseDeck.table.insert(deck_id, CassaPhraseDeckSerializer(self).data)
+        self.game_id = str(deck_id)
         
+class CassaPhraseDeckSerializer(serializers.ModelSerializer):
+    '''
+        The PhraseDeck serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
+    '''
+    class Meta:
+        model = PhraseDeck
+        fields = ('name', 'description', 'last_modified', 'date_created')
+
 
 class PhraseCard(CassaModel):
     '''
@@ -75,7 +97,8 @@ class PhraseCard(CassaModel):
     description = models.TextField()
     deck = models.TextField()
     term = models.TextField()
-    order = models.IntegerField()
+    last_modified = models.DateTimeField()
+    date_created = models.DateTimeField()
 
     @staticmethod
     def fromMap(mapRep):
@@ -125,6 +148,24 @@ class PhraseCard(CassaModel):
         clause = pycassa.create_index_clause([deck_expr, rand_expr], count=1)
         ans = list(PhraseCard.table.get_indexed_slices(clause))[0]
         return PhraseCard.fromCassa(ans)
+    
+    def save(self):
+        '''
+            Saves a PhraseCard given by the cassandra in/output, which is
+            a dictionary of values.
+        '''
+        card_id = uuid.uuid1() if not self.phrase_card_id else uuid.UUID(self.phrase_card_id)
+        PhraseCard.table.insert(card_id, CassaPhraseCardSerializer(self).data)
+        self.phrase_card_id = str(card_id)
+
+class CassaPhraseCardSerializer(serializers.ModelSerializer):
+    '''
+        The PhraseCard serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
+    '''
+    class Meta:
+        model = PhraseDeck
+        fields = ('deck', 'description', 'term', 'last_modified', 'date_created')
 
 
 class NominationDeck(CassaModel):
@@ -136,6 +177,9 @@ class NominationDeck(CassaModel):
     
     deck_id = models.TextField(primary_key=True)
     description = models.TextField()
+    name = models.TextField()
+    last_modified = models.DateTimeField()
+    date_created = models.DateTimeField()
     
     @staticmethod
     def fromMap(mapRep):
@@ -174,6 +218,24 @@ class NominationDeck(CassaModel):
         if not isinstance(deck_id, uuid.UUID):
             deck_id = uuid.UUID(deck_id)
         return NominationDeck.fromCassa((str(deck_id), NominationDeck.table.get(deck_id)))
+
+    def save(self):
+        '''
+            Saves a PhraseCard given by the cassandra in/output, which is
+            a dictionary of values.
+        '''
+        deck_id = uuid.uuid1() if not self.deck_id else uuid.UUID(self.deck_id)
+        NominationDeck.table.insert(deck_id, CassaNominationDeckSerializer(self).data)
+        self.deck_id = str(deck_id)
+            
+class CassaNominationDeckSerializer(serializers.ModelSerializer):
+    '''
+        The NominationDeck serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
+    '''
+    class Meta:
+        model = PhraseDeck
+        fields = ('deck_id', 'name', 'description', 'last_modified', 'date_created')
     
 class NominationCard(CassaModel):
     '''
@@ -185,7 +247,8 @@ class NominationCard(CassaModel):
     description = models.TextField()
     deck = models.TextField()
     term = models.TextField()
-    order = models.IntegerField()
+    last_modified = models.DateTimeField()
+    date_created = models.DateTimeField()
 
     @staticmethod
     def fromMap(mapRep):
@@ -224,3 +287,21 @@ class NominationCard(CassaModel):
         if not isinstance(card_id, uuid.UUID):
             card_id = uuid.UUID(card_id)
         return NominationCard.fromCassa((str(card_id), NominationCard.table.get(card_id)))
+    
+    def save(self):
+        '''
+            Saves a NominationCard given by the cassandra in/output, which is
+            a dictionary of values.
+        '''
+        card_id = uuid.uuid1() if not self.nomination_card_id else uuid.UUID(self.nomination_card_id)
+        NominationCard.table.insert(card_id, CassaPhraseCardSerializer(self).data)
+        self.nomination_card_id = str(card_id)
+    
+class CassaNominationCardSerializer(serializers.ModelSerializer):
+    '''
+        The NominationCard serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
+    '''
+    class Meta:
+        model = PhraseDeck
+        fields = ('deck', 'description', 'term', 'last_modified', 'date_created')
